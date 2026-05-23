@@ -1,0 +1,202 @@
+<div class="product-detail-page" *ngIf="!loading(); else loader" style="padding-top:80px">
+  @if (product(); as p) {
+    <div class="container" style="padding-top:32px; padding-bottom:64px">
+      <!-- Breadcrumb -->
+      <div class="breadcrumb">
+        <a routerLink="/">Home</a>
+        <span class="separator">/</span>
+        <a routerLink="/products">Shop</a>
+        <span class="separator">/</span>
+        <a routerLink="/products" [queryParams]="{category: p.category_slug}">{{ p.category_name }}</a>
+        <span class="separator">/</span>
+        <span class="current">{{ p.name }}</span>
+      </div>
+
+      <div class="product-layout">
+        <!-- Gallery -->
+        <div class="product-gallery">
+          <div class="main-image">
+            <img [src]="(p.images && p.images[selectedImage()]) ? p.images[selectedImage()].image_url : p.thumbnail" [alt]="p.name">
+            @if (p.sale_price) {
+              <div class="gallery-badge">-{{ getDiscountPercentage() }}% OFF</div>
+            }
+          </div>
+          @if (p.images && p.images.length > 1) {
+            <div class="thumb-strip">
+              @for (img of p.images; track img.id; let i = $index) {
+                <div class="thumb" [class.active]="selectedImage() === i" (click)="selectedImage.set(i)">
+                  <img [src]="img.image_url" [alt]="img.alt_text">
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info">
+          <div class="info-header">
+            <span class="category-tag">{{ p.category_name }}</span>
+            @if (p.is_customizable) { <span class="custom-tag"><i class="fas fa-magic"></i> Customizable</span> }
+          </div>
+          <h1>{{ p.name }}</h1>
+
+          <div class="rating-row">
+            <div class="stars-display">
+              @for (s of [1,2,3,4,5]; track s) {
+                <i class="fas fa-star" [style.color]="s <= p.average_rating ? '#F59E0B' : '#DDD'"></i>
+              }
+            </div>
+            <span class="rating-val">{{ p.average_rating | number:'1.1-1' }}</span>
+            <span class="review-count">({{ p.total_reviews }} reviews)</span>
+            <span class="sold-count">• {{ p.total_sold }} sold</span>
+          </div>
+
+          <div class="price-display">
+            <span class="current-price">₹{{ (p.sale_price || p.base_price) | number }}</span>
+            @if (p.sale_price) {
+              <span class="original-price">₹{{ p.base_price | number }}</span>
+              <span class="savings-badge">Save {{ getDiscountPercentage() }}%</span>
+            }
+          </div>
+          <p class="tax-note"><i class="fas fa-info-circle"></i> Inclusive of all taxes. Free delivery on orders above ₹25,000.</p>
+
+          <!-- Stock Status -->
+          <div class="stock-status" [class.low-stock]="p.stock_quantity < 5">
+            @if (p.stock_quantity > 0) {
+              <i class="fas fa-check-circle" style="color: var(--success)"></i>
+              <span>{{ p.stock_quantity < 5 ? 'Only ' + p.stock_quantity + ' left in stock!' : 'In Stock' }}</span>
+            } @else {
+              <i class="fas fa-times-circle" style="color: var(--error)"></i>
+              <span>Out of Stock</span>
+            }
+          </div>
+
+          <!-- Short Description -->
+          <p class="short-desc-text">{{ p.short_description }}</p>
+
+          <!-- Quantity -->
+          <div class="qty-section">
+            <label class="section-label">Quantity</label>
+            <div class="qty-control">
+              <button class="qty-btn" (click)="changeQty(-1)"><i class="fas fa-minus"></i></button>
+              <span class="qty-value">{{ quantity() }}</span>
+              <button class="qty-btn" (click)="changeQty(1)"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="product-actions">
+            <button class="btn btn-primary btn-lg" (click)="addToCart()" [disabled]="p.stock_quantity === 0" style="flex:1">
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+            @if (p.is_customizable) {
+              <a routerLink="/customize/{{ p.slug }}" class="btn btn-accent btn-lg" style="flex:1">
+                <i class="fas fa-magic"></i> Customize
+              </a>
+            }
+            <button class="btn btn-ghost btn-lg wish-btn"><i class="fas fa-heart"></i></button>
+          </div>
+
+          <!-- Delivery & Warranty -->
+          <div class="delivery-info">
+            <div class="delivery-item"><i class="fas fa-truck"></i><div><strong>Free Delivery</strong><span>On orders above ₹25,000</span></div></div>
+            <div class="delivery-item"><i class="fas fa-calendar-alt"></i><div><strong>Est. Delivery</strong><span>14-21 working days</span></div></div>
+            <div class="delivery-item"><i class="fas fa-shield-alt"></i><div><strong>5-Year Warranty</strong><span>On all wood furniture</span></div></div>
+            <div class="delivery-item"><i class="fas fa-redo"></i><div><strong>30-Day Returns</strong><span>Hassle-free return policy</span></div></div>
+          </div>
+
+          <!-- Specs Quick View -->
+          @if (p.weight || p.dimensions_length) {
+            <div class="quick-specs">
+              <h4>Quick Specs</h4>
+              <div class="specs-grid">
+                @if (p.weight) { <div class="spec-item"><span>Weight</span><strong>{{ p.weight }} kg</strong></div> }
+                @if (p.dimensions_length) { <div class="spec-item"><span>Length</span><strong>{{ p.dimensions_length }} cm</strong></div> }
+                @if (p.dimensions_width) { <div class="spec-item"><span>Width</span><strong>{{ p.dimensions_width }} cm</strong></div> }
+                @if (p.dimensions_height) { <div class="spec-item"><span>Height</span><strong>{{ p.dimensions_height }} cm</strong></div> }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Tabs Section -->
+      <div class="detail-tabs">
+        <div class="tab-nav">
+          <button class="tab-btn" [class.active]="activeTab() === 'description'" (click)="activeTab.set('description')">Description</button>
+          <button class="tab-btn" [class.active]="activeTab() === 'specs'" (click)="activeTab.set('specs')">Specifications</button>
+          <button class="tab-btn" [class.active]="activeTab() === 'reviews'" (click)="activeTab.set('reviews')">
+            Reviews ({{ p.total_reviews }})
+          </button>
+        </div>
+
+        <div class="tab-content">
+          @if (activeTab() === 'description') {
+            <div class="description-content" [innerHTML]="p.description || '<p>' + p.short_description + '</p>'"></div>
+          } @else if (activeTab() === 'specs') {
+            <div class="specs-table">
+              <table>
+                <tr><td>Material</td><td>Grade-A Solid Teak Wood</td></tr>
+                <tr><td>Finish</td><td>Hand-rubbed Oil Finish</td></tr>
+                <tr><td>Assembly</td><td>Professional assembly included</td></tr>
+                @if (p.weight) { <tr><td>Weight</td><td>{{ p.weight }} kg</td></tr> }
+                @if (p.dimensions_length) { <tr><td>Dimensions (L×W×H)</td><td>{{ p.dimensions_length }} × {{ p.dimensions_width }} × {{ p.dimensions_height }} cm</td></tr> }
+                <tr><td>Warranty</td><td>5 Years on Wood Structure</td></tr>
+                <tr><td>Country of Origin</td><td>Made in India 🇮🇳</td></tr>
+              </table>
+            </div>
+          } @else if (activeTab() === 'reviews') {
+            <div class="reviews-section">
+              <div class="rating-overview">
+                <div class="big-rating">
+                  <span class="big-num">{{ p.average_rating | number:'1.1-1' }}</span>
+                  <div class="big-stars">
+                    @for (s of [1,2,3,4,5]; track s) {
+                      <i class="fas fa-star" [style.color]="s <= p.average_rating ? '#F59E0B' : '#DDD'"></i>
+                    }
+                  </div>
+                  <span>Based on {{ p.total_reviews }} reviews</span>
+                </div>
+              </div>
+              <div class="reviews-list">
+                @for (review of p.reviews; track review.id) {
+                  <div class="review-card">
+                    <div class="review-header">
+                      <div class="reviewer-avatar">{{ review.first_name.charAt(0) }}</div>
+                      <div>
+                        <strong>{{ review.first_name }} {{ review.last_name }}</strong>
+                        @if (review.is_verified_purchase) { <span class="verified-badge"><i class="fas fa-check"></i> Verified Purchase</span> }
+                        <div class="review-stars">
+                          @for (s of [1,2,3,4,5]; track s) {
+                            <i class="fas fa-star" [style.color]="s <= review.rating ? '#F59E0B' : '#DDD'" style="font-size:0.75rem"></i>
+                          }
+                        </div>
+                      </div>
+                      <span class="review-date">{{ review.created_at | date:'mediumDate' }}</span>
+                    </div>
+                    @if (review.title) { <h5 class="review-title">{{ review.title }}</h5> }
+                    <p class="review-text">{{ review.review_text }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<ng-template #loader>
+  <div class="container" style="padding-top:120px; padding-bottom:64px">
+    <div class="product-layout">
+      <div class="skeleton" style="height:450px; border-radius:16px"></div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="skeleton" style="height:24px; width:60%; border-radius:4px"></div>
+        <div class="skeleton" style="height:36px; border-radius:4px"></div>
+        <div class="skeleton" style="height:16px; width:40%; border-radius:4px"></div>
+        <div class="skeleton" style="height:40px; width:50%; border-radius:4px"></div>
+      </div>
+    </div>
+  </div>
+</ng-template>

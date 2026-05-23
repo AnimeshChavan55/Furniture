@@ -1,0 +1,116 @@
+<footer class="footer">
+  <!-- Newsletter Strip -->
+  <div class="newsletter-strip">
+    <div class="container">
+      <div class="newsletter-content">
+        <div class="newsletter-text">
+          <h3>Get Exclusive Offers & Design Inspiration</h3>
+          <p>Subscribe to our newsletter for special discounts and new arrivals</p>
+        </div>
+        <form class="newsletter-form" (submit)="$event.preventDefault()">
+          <input type="email" placeholder="Enter your email address" class="newsletter-input">
+          <button type="submit" class="btn btn-accent">Subscribe</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Footer -->
+  <div class="footer-main">
+    <div class="container footer-grid">
+
+      <!-- Brand Column -->
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <span class="logo-icon">🛋️</span>
+          <div>
+            <span class="logo-name">CustomCraft</span>
+            <span class="logo-tag">Furniture</span>
+          </div>
+        </div>
+        <p>India's premier destination for handcrafted, customizable furniture. Every piece is made-to-order with the finest woods and fabrics.</p>
+        <div class="footer-badges">
+          <span class="badge-item">🏅 ISO Certified</span>
+          <span class="badge-item">♻️ Eco-Friendly</span>
+          <span class="badge-item">🤝 Fair Trade</span>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="footer-links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a routerLink="/">Home</a></li>
+          <li><a routerLink="/products">Shop All</a></li>
+          <li><a routerLink="/products" [queryParams]="{featured: true}">Featured Products</a></li>
+          <li><a routerLink="/about">About Us</a></li>
+          <li><a routerLink="/contact">Contact</a></li>
+          <li><a routerLink="/faq">FAQ</a></li>
+        </ul>
+      </div>
+
+      <!-- Categories -->
+      <div class="footer-links">
+        <h4>Categories</h4>
+        <ul>
+          <li><a routerLink="/products" [queryParams]="{category: 'living-room'}">Living Room</a></li>
+          <li><a routerLink="/products" [queryParams]="{category: 'bedroom'}">Bedroom</a></li>
+          <li><a routerLink="/products" [queryParams]="{category: 'dining-room'}">Dining Room</a></li>
+          <li><a routerLink="/products" [queryParams]="{category: 'office'}">Office</a></li>
+          <li><a routerLink="/products" [queryParams]="{category: 'outdoor'}">Outdoor</a></li>
+          <li><a routerLink="/products" [queryParams]="{category: 'kids-room'}">Kids Room</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="footer-contact">
+        <h4>Contact Us</h4>
+        <div class="contact-items">
+          <div class="contact-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>42, Furniture Lane, Jaipur, Rajasthan 302001</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-phone"></i>
+            <span>+91 98765 43210</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-envelope"></i>
+            <span>support&#64;customcraft.com</span>
+          </div>
+          <div class="contact-item">
+            <i class="fas fa-clock"></i>
+            <span>Mon-Sat: 9 AM – 7 PM</span>
+          </div>
+        </div>
+
+        <!-- Social Links -->
+        <div class="social-links">
+          <a href="#" class="social-btn" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-btn" title="Instagram"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-btn" title="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-btn" title="YouTube"><i class="fab fa-youtube"></i></a>
+          <a href="#" class="social-btn" title="Pinterest"><i class="fab fa-pinterest-p"></i></a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer Bottom -->
+  <div class="footer-bottom">
+    <div class="container footer-bottom-content">
+      <p>© {{ currentYear }} CustomCraft Furniture. All rights reserved.</p>
+      <div class="footer-bottom-links">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Refund Policy</a>
+        <a href="#">Shipping Policy</a>
+      </div>
+      <div class="payment-icons">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa" width="40">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png" alt="Mastercard" width="40">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/UPI-Logo-vector.svg/200px-UPI-Logo-vector.svg.png" alt="UPI" width="40">
+      </div>
+    </div>
+  </div>
+</footer>

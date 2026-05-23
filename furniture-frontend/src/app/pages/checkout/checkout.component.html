@@ -1,0 +1,200 @@
+<div class="checkout-page" style="padding-top:80px;background:var(--bg-secondary);min-height:100vh">
+  <div class="container" style="padding-top:32px;padding-bottom:64px">
+    <h1 style="margin-bottom:8px"><i class="fas fa-lock" style="color:var(--primary)"></i> Secure Checkout</h1>
+
+    <!-- Steps Progress -->
+    <div class="steps-bar">
+      <div class="step-indicator" [class.active]="step() >= 1" [class.done]="step() > 1">
+        <div class="step-circle">{{ step() > 1 ? '✓' : '1' }}</div>
+        <span>Delivery Address</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-indicator" [class.active]="step() >= 2" [class.done]="step() > 2">
+        <div class="step-circle">{{ step() > 2 ? '✓' : '2' }}</div>
+        <span>Payment</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step-indicator" [class.active]="step() >= 3">
+        <div class="step-circle">3</div>
+        <span>Review & Place Order</span>
+      </div>
+    </div>
+
+    <div class="checkout-layout">
+      <!-- Left: Steps -->
+      <div class="checkout-steps">
+
+        <!-- Step 1: Address -->
+        @if (step() === 1) {
+          <div class="step-card">
+            <h3><i class="fas fa-map-marker-alt"></i> Delivery Address</h3>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+              <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" class="form-control" [value]="address().full_name" (input)="updateAddress('full_name', $any($event.target).value)" placeholder="Rahul Sharma">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Mobile Number *</label>
+                <input type="tel" class="form-control" [value]="address().phone" (input)="updateAddress('phone', $any($event.target).value)" placeholder="+91 98765 43210">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address Line 1 *</label>
+              <input type="text" class="form-control" [value]="address().address_line1" (input)="updateAddress('address_line1', $any($event.target).value)" placeholder="House/Flat No, Street, Area">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Address Line 2</label>
+              <input type="text" class="form-control" [value]="address().address_line2 || ''" (input)="updateAddress('address_line2', $any($event.target).value)" placeholder="Landmark (optional)">
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+              <div class="form-group">
+                <label class="form-label">City *</label>
+                <input type="text" class="form-control" [value]="address().city" (input)="updateAddress('city', $any($event.target).value)" placeholder="Mumbai">
+              </div>
+              <div class="form-group">
+                <label class="form-label">State *</label>
+                <select class="form-control" (change)="updateAddress('state', $any($event.target).value)">
+                  <option value="">Select State</option>
+                  <option value="Rajasthan">Rajasthan</option>
+                  <option value="Maharashtra">Maharashtra</option>
+                  <option value="Delhi">Delhi</option>
+                  <option value="Gujarat">Gujarat</option>
+                  <option value="Karnataka">Karnataka</option>
+                  <option value="Tamil Nadu">Tamil Nadu</option>
+                  <option value="Uttar Pradesh">Uttar Pradesh</option>
+                  <option value="West Bengal">West Bengal</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">PIN Code *</label>
+                <input type="text" class="form-control" [value]="address().pincode" (input)="updateAddress('pincode', $any($event.target).value)" placeholder="400001" maxlength="6">
+              </div>
+            </div>
+            <button class="btn btn-primary btn-lg" (click)="nextStep()">
+              Continue to Payment <i class="fas fa-arrow-right"></i>
+            </button>
+          </div>
+        }
+
+        <!-- Step 2: Payment -->
+        @if (step() === 2) {
+          <div class="step-card">
+            <h3><i class="fas fa-credit-card"></i> Payment Method</h3>
+            <div class="payment-options">
+              <label class="payment-option" [class.selected]="paymentMethod() === 'online'" (click)="paymentMethod.set('online')">
+                <div class="p-radio"></div>
+                <div class="p-icon"><i class="fas fa-credit-card"></i></div>
+                <div><strong>Online Payment</strong><span>Credit/Debit Card, UPI, Net Banking</span></div>
+              </label>
+              <label class="payment-option" [class.selected]="paymentMethod() === 'cod'" (click)="paymentMethod.set('cod')">
+                <div class="p-radio"></div>
+                <div class="p-icon"><i class="fas fa-money-bill-wave"></i></div>
+                <div><strong>Cash on Delivery</strong><span>Pay when your furniture arrives</span></div>
+              </label>
+              <label class="payment-option" [class.selected]="paymentMethod() === 'emi'" (click)="paymentMethod.set('emi')">
+                <div class="p-radio"></div>
+                <div class="p-icon"><i class="fas fa-calendar-alt"></i></div>
+                <div><strong>EMI</strong><span>0% EMI available on select banks</span></div>
+              </label>
+            </div>
+
+            @if (paymentMethod() === 'online') {
+              <div class="payment-note">
+                <i class="fas fa-lock" style="color:var(--success)"></i>
+                <p>You'll be redirected to our secure payment gateway after placing the order. We accept Visa, Mastercard, UPI, and Net Banking.</p>
+              </div>
+            }
+
+            <!-- Coupon -->
+            <div class="coupon-section">
+              <h4><i class="fas fa-tag"></i> Apply Coupon</h4>
+              <div class="coupon-row">
+                <input type="text" class="form-control" placeholder="Enter coupon code (e.g. WELCOME10)"
+                  [value]="couponCode()" (input)="couponCode.set($any($event.target).value)" style="text-transform:uppercase">
+                <button class="btn btn-secondary" (click)="applyCoupon()">Apply</button>
+              </div>
+              @if (couponDiscount() > 0) {
+                <p style="color:var(--success);font-size:0.875rem;margin-top:8px">
+                  <i class="fas fa-check-circle"></i> Coupon applied! You save ₹{{ couponDiscount() | number:'1.0-0' }}
+                </p>
+              }
+            </div>
+
+            <div style="display:flex;gap:12px;margin-top:24px">
+              <button class="btn btn-ghost" (click)="step.set(1)"><i class="fas fa-arrow-left"></i> Back</button>
+              <button class="btn btn-primary btn-lg" style="flex:1" (click)="nextStep()">Review Order <i class="fas fa-arrow-right"></i></button>
+            </div>
+          </div>
+        }
+
+        <!-- Step 3: Review -->
+        @if (step() === 3) {
+          <div class="step-card">
+            <h3><i class="fas fa-clipboard-check"></i> Review Your Order</h3>
+
+            <div class="review-section">
+              <h4>Delivery Address</h4>
+              <div class="address-preview">
+                <strong>{{ address().full_name }}</strong> | {{ address().phone }}<br>
+                {{ address().address_line1 }}, {{ address().address_line2 }}<br>
+                {{ address().city }}, {{ address().state }} - {{ address().pincode }}
+              </div>
+            </div>
+
+            <div class="review-section">
+              <h4>Payment Method</h4>
+              <p>{{ paymentMethod() === 'online' ? '💳 Online Payment' : paymentMethod() === 'cod' ? '💵 Cash on Delivery' : '📅 EMI' }}</p>
+            </div>
+
+            <div class="review-section">
+              <h4>Items ({{ cartItems().length }})</h4>
+              <div class="review-items">
+                @for (item of cartItems(); track item.id) {
+                  <div class="review-item">
+                    <img [src]="item.thumbnail || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=80&q=60'" [alt]="item.name" style="width:50px;height:50px;object-fit:cover;border-radius:8px">
+                    <div style="flex:1"><strong>{{ item.name }}</strong><br><span style="font-size:0.8125rem;color:var(--text-muted)">Qty: {{ item.quantity }}</span></div>
+                    <span style="font-weight:700;color:var(--primary-dark)">₹{{ item.item_total | number }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <div style="background:var(--warning-light);border-radius:var(--radius-md);padding:14px;margin-bottom:24px;font-size:0.875rem">
+              <i class="fas fa-info-circle" style="color:var(--warning)"></i>
+              Custom furniture takes 14-21 working days to craft and deliver.
+            </div>
+
+            <div style="display:flex;gap:12px">
+              <button class="btn btn-ghost" (click)="step.set(2)"><i class="fas fa-arrow-left"></i> Back</button>
+              <button class="btn btn-primary btn-lg" style="flex:1" (click)="placeOrder()" [disabled]="loading()">
+                @if (loading()) { <i class="fas fa-spinner fa-spin"></i> Placing Order... }
+                @else { <i class="fas fa-check-circle"></i> Place Order — ₹{{ summary().total | number:'1.0-0' }} }
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Right: Summary -->
+      <div class="order-sidebar">
+        <div class="summary-card">
+          <h3>Order Summary</h3>
+          <div class="sum-rows">
+            <div class="sum-row"><span>Subtotal</span><span>₹{{ summary().subtotal | number }}</span></div>
+            <div class="sum-row"><span>GST (18%)</span><span>₹{{ summary().tax | number:'1.0-0' }}</span></div>
+            <div class="sum-row"><span>Shipping</span><span [class.green]="summary().shipping===0">{{ summary().shipping === 0 ? 'FREE' : '₹' + (summary().shipping | number) }}</span></div>
+            @if (couponDiscount() > 0) {
+              <div class="sum-row" style="color:var(--success)"><span>Coupon Discount</span><span>-₹{{ couponDiscount() | number:'1.0-0' }}</span></div>
+            }
+            <div class="sum-total"><span>Total</span><span>₹{{ summary().total | number:'1.0-0' }}</span></div>
+          </div>
+          <div class="checkout-trust">
+            <div><i class="fas fa-lock" style="color:var(--success)"></i> SSL Secured Payment</div>
+            <div><i class="fas fa-award" style="color:var(--primary)"></i> 5-Year Warranty</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

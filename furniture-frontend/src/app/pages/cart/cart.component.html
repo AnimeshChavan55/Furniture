@@ -1,0 +1,103 @@
+<div class="cart-page" style="padding-top:80px; background:var(--bg-secondary); min-height:100vh">
+  <div class="container" style="padding-top:32px;padding-bottom:64px">
+    <div class="page-title-row">
+      <h1><i class="fas fa-shopping-cart" style="color:var(--primary)"></i> Shopping Cart</h1>
+      @if (items().length > 0) {
+        <button class="btn btn-ghost btn-sm" (click)="clearCart()"><i class="fas fa-trash"></i> Clear Cart</button>
+      }
+    </div>
+
+    @if (loading()) {
+      <div style="display:flex;align-items:center;justify-content:center;height:40vh">
+        <i class="fas fa-spinner fa-spin fa-2x" style="color:var(--primary)"></i>
+      </div>
+    } @else if (items().length === 0) {
+      <div class="empty-state">
+        <div class="icon">🛒</div>
+        <h3>Your cart is empty</h3>
+        <p>Looks like you haven't added any furniture yet</p>
+        <a routerLink="/products" class="btn btn-primary btn-lg">
+          <i class="fas fa-store"></i> Browse Collection
+        </a>
+      </div>
+    } @else {
+      <div class="cart-layout">
+        <!-- Items -->
+        <div class="cart-items">
+          @for (item of items(); track item.id) {
+            <div class="cart-item">
+              <div class="item-img">
+                <img [src]="item.thumbnail || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200&q=80'" [alt]="item.name">
+              </div>
+              <div class="item-details">
+                <a routerLink="/products/{{ item.slug }}" class="item-name">{{ item.name }}</a>
+                @if (item.customization_details) {
+                  <div class="item-custom">
+                    <i class="fas fa-magic"></i> Customized
+                    @for (key of ['size','wood_type','color','fabric']; track key) {
+                      @if ($any(item.customization_details)[key]) {
+                        <span>{{ $any(item.customization_details)[key]?.option_name }}</span>
+                      }
+                    }
+                  </div>
+                }
+                <div class="item-price">₹{{ item.unit_price | number }} / unit</div>
+              </div>
+              <div class="item-qty">
+                <button class="qty-btn" (click)="updateQty(item, item.quantity - 1)" [disabled]="item.quantity <= 1">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <span>{{ item.quantity }}</span>
+                <button class="qty-btn" (click)="updateQty(item, item.quantity + 1)" [disabled]="item.quantity >= item.stock_quantity">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+              <div class="item-total">₹{{ item.item_total | number }}</div>
+              <button class="remove-btn" (click)="removeItem(item)" title="Remove">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Summary -->
+        <div class="cart-summary">
+          <div class="summary-card">
+            <h3>Order Summary</h3>
+            <div class="summary-rows">
+              <div class="sum-row"><span>Subtotal ({{ items().length }} items)</span><span>₹{{ summary().subtotal | number }}</span></div>
+              <div class="sum-row"><span>GST (18%)</span><span>₹{{ summary().tax | number:'1.0-0' }}</span></div>
+              <div class="sum-row">
+                <span>Shipping</span>
+                <span [class.free-ship]="summary().shipping === 0">
+                  {{ summary().shipping === 0 ? 'FREE' : '₹' + (summary().shipping | number) }}
+                </span>
+              </div>
+              @if (summary().shipping > 0) {
+                <p class="ship-note">Add ₹{{ (25000 - summary().subtotal) | number }} more for free shipping</p>
+              }
+            </div>
+            <div class="sum-total">
+              <span>Total Amount</span>
+              <span>₹{{ summary().total | number:'1.0-0' }}</span>
+            </div>
+            <button class="btn btn-primary btn-full btn-lg" (click)="proceedToCheckout()">
+              <i class="fas fa-lock"></i> Proceed to Checkout
+            </button>
+            <a routerLink="/products" class="btn btn-ghost btn-full" style="margin-top:10px">
+              <i class="fas fa-arrow-left"></i> Continue Shopping
+            </a>
+          </div>
+
+          <!-- Trust Badges -->
+          <div class="trust-card">
+            <div class="trust-row"><i class="fas fa-shield-alt" style="color:var(--success)"></i><span>100% Secure Payment</span></div>
+            <div class="trust-row"><i class="fas fa-truck" style="color:var(--primary)"></i><span>Free delivery above ₹25,000</span></div>
+            <div class="trust-row"><i class="fas fa-redo" style="color:var(--info)"></i><span>30-day return policy</span></div>
+            <div class="trust-row"><i class="fas fa-award" style="color:var(--accent-dark)"></i><span>5-year warranty</span></div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

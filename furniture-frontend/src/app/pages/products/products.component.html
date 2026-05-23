@@ -1,0 +1,205 @@
+<div class="products-page">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="container">
+      <div class="breadcrumb">
+        <a routerLink="/">Home</a>
+        <span class="separator">/</span>
+        <span class="current">Shop</span>
+      </div>
+      <h1>Our Furniture Collection</h1>
+      <p>Discover {{ totalProducts() }}+ handcrafted pieces — each customizable to perfection</p>
+    </div>
+  </div>
+
+  <div class="container products-layout">
+    <!-- Sidebar Filters -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h3><i class="fas fa-filter"></i> Filters</h3>
+        <button class="btn btn-ghost btn-sm" (click)="clearFilters()">Clear All</button>
+      </div>
+
+      <!-- Search -->
+      <div class="filter-group">
+        <h4 class="filter-title">Search</h4>
+        <div class="search-wrap">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" class="form-control" placeholder="Search furniture..."
+            [value]="searchText()" (input)="searchText.set($any($event.target).value)"
+            (keyup.enter)="onSearch()">
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="filter-group">
+        <h4 class="filter-title">Room Type</h4>
+        <div class="filter-options">
+          <label class="filter-option" [class.active]="!filters().category" (click)="updateFilterCategory(undefined)">
+            <span>All Rooms</span>
+          </label>
+          <label class="filter-option" [class.active]="filters().category === 'living-room'" (click)="updateFilterCategory('living-room')">
+            <span>🛋️ Living Room</span>
+          </label>
+          <label class="filter-option" [class.active]="filters().category === 'bedroom'" (click)="updateFilterCategory('bedroom')">
+            <span>🛏️ Bedroom</span>
+          </label>
+          <label class="filter-option" [class.active]="filters().category === 'dining-room'" (click)="updateFilterCategory('dining-room')">
+            <span>🍽️ Dining Room</span>
+          </label>
+          <label class="filter-option" [class.active]="filters().category === 'office'" (click)="updateFilterCategory('office')">
+            <span>💼 Office</span>
+          </label>
+          <label class="filter-option" [class.active]="filters().category === 'outdoor'" (click)="updateFilterCategory('outdoor')">
+            <span>🌿 Outdoor</span>
+          </label>
+          <label class="filter-option" [class.active]="filters().category === 'kids-room'" (click)="updateFilterCategory('kids-room')">
+            <span>🎠 Kids Room</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Price Range -->
+      <div class="filter-group">
+        <h4 class="filter-title">Price Range</h4>
+        <div class="filter-options">
+          @for (range of priceRanges; track range.label) {
+            <label class="filter-option" [class.active]="filters().min_price === range.min && filters().max_price === range.max"
+              (click)="onPriceFilter(range.min, range.max)">
+              <span>{{ range.label }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <!-- Customizable Toggle -->
+      <div class="filter-group">
+        <h4 class="filter-title">Options</h4>
+        <label class="toggle-filter" [class.active]="filters().featured" (click)="toggleFilter('featured')">
+          <i class="fas fa-star"></i> Featured Only
+        </label>
+        <label class="toggle-filter" [class.active]="filters().customizable" (click)="toggleFilter('customizable')">
+          <i class="fas fa-magic"></i> Customizable Only
+        </label>
+      </div>
+    </aside>
+
+    <!-- Products Area -->
+    <main class="products-main">
+      <!-- Toolbar -->
+      <div class="products-toolbar">
+        <p class="results-count">
+          Showing <strong>{{ products().length }}</strong> of <strong>{{ totalProducts() }}</strong> products
+        </p>
+        <div class="toolbar-right">
+          <select class="form-control sort-select" (change)="onSortChange($any($event.target).value)">
+            @for (opt of sortOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      @if (loading()) {
+        <div class="products-grid">
+          @for (i of [1,2,3,4,5,6]; track i) {
+            <div class="product-card">
+              <div class="skeleton" style="height:220px;border-radius:12px 12px 0 0"></div>
+              <div style="padding:16px">
+                <div class="skeleton" style="height:14px;margin-bottom:8px;border-radius:4px"></div>
+                <div class="skeleton" style="height:20px;margin-bottom:8px;border-radius:4px"></div>
+                <div class="skeleton" style="height:14px;width:60%;border-radius:4px"></div>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (products().length === 0) {
+        <div class="empty-state">
+          <div class="icon">🛋️</div>
+          <h3>No products found</h3>
+          <p>Try adjusting your filters or search term</p>
+          <button class="btn btn-primary" (click)="clearFilters()">Clear Filters</button>
+        </div>
+      } @else {
+        <div class="products-grid">
+          @for (product of products(); track product.id) {
+            <div class="product-card">
+              <div class="img-wrap">
+                <a routerLink="/products/{{ product.slug }}">
+                  <img [src]="product.thumbnail || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80'" [alt]="product.name" loading="lazy">
+                </a>
+                @if (product.sale_price) {
+                  <span class="badge badge-sale">-{{ getDiscountPercentage(product) }}%</span>
+                }
+                @if (product.is_customizable) {
+                  <span class="badge badge-custom" style="top:44px">✨ Custom</span>
+                }
+                <div class="card-actions">
+                  <button class="card-action-btn" (click)="addToCart(product, $event)" title="Add to Cart">
+                    <i class="fas fa-shopping-cart"></i>
+                  </button>
+                  @if (product.is_customizable) {
+                    <a routerLink="/customize/{{ product.slug }}" class="card-action-btn" title="Customize">
+                      <i class="fas fa-magic"></i>
+                    </a>
+                  }
+                  <button class="card-action-btn" title="Wishlist">
+                    <i class="fas fa-heart"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="category">{{ product.category_name }}</div>
+                <a routerLink="/products/{{ product.slug }}" style="text-decoration:none">
+                  <h3 class="name">{{ product.name }}</h3>
+                </a>
+                <p class="short-desc">{{ product.short_description }}</p>
+                <div class="rating">
+                  <div class="stars">
+                    @for (s of [1,2,3,4,5]; track s) {
+                      <i class="fas fa-star" [style.color]="s <= product.average_rating ? '#F59E0B' : '#DDD'"></i>
+                    }
+                  </div>
+                  <span class="rating-count">({{ product.total_reviews }})</span>
+                </div>
+                <div class="price-row">
+                  <span class="price">₹{{ (product.sale_price || product.base_price) | number }}</span>
+                  @if (product.sale_price) {
+                    <span class="price-old">₹{{ product.base_price | number }}</span>
+                    <span class="price-discount">{{ getDiscountPercentage(product) }}% off</span>
+                  }
+                </div>
+                <div class="card-footer-btns">
+                  <button class="btn btn-primary add-cart-btn" (click)="addToCart(product, $event)">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                  </button>
+                  @if (product.is_customizable) {
+                    <a routerLink="/customize/{{ product.slug }}" class="btn btn-secondary add-cart-btn">
+                      <i class="fas fa-magic"></i>
+                    </a>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages() > 1) {
+          <div class="pagination">
+            <button class="page-btn" [disabled]="currentPage() === 1" (click)="goToPage(currentPage() - 1)">
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            @for (p of getPages(); track p) {
+              <button class="page-btn" [class.active]="p === currentPage()" (click)="goToPage(p)">{{ p }}</button>
+            }
+            <button class="page-btn" [disabled]="currentPage() === totalPages()" (click)="goToPage(currentPage() + 1)">
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        }
+      }
+    </main>
+  </div>
+</div>

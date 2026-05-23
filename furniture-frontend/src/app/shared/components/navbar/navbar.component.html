@@ -1,0 +1,112 @@
+<header class="navbar" [class.scrolled]="isScrolled()">
+  <div class="container navbar-container">
+
+    <!-- Logo -->
+    <a routerLink="/" class="navbar-brand" (click)="closeMobileMenu()">
+      <div class="brand-icon">🛋️</div>
+      <div class="brand-text">
+        <span class="brand-name">CustomCraft</span>
+        <span class="brand-tagline">Furniture</span>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="navbar-nav" [class.mobile-open]="mobileMenuOpen()">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-link" (click)="closeMobileMenu()">Home</a>
+      <a routerLink="/products" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Shop</a>
+      <div class="nav-dropdown">
+        <span class="nav-link">Categories <i class="fas fa-chevron-down"></i></span>
+        <div class="dropdown-menu">
+          <a routerLink="/products" [queryParams]="{category: 'living-room'}" class="dropdown-item" (click)="closeMobileMenu()">🛋️ Living Room</a>
+          <a routerLink="/products" [queryParams]="{category: 'bedroom'}" class="dropdown-item" (click)="closeMobileMenu()">🛏️ Bedroom</a>
+          <a routerLink="/products" [queryParams]="{category: 'dining-room'}" class="dropdown-item" (click)="closeMobileMenu()">🍽️ Dining Room</a>
+          <a routerLink="/products" [queryParams]="{category: 'office'}" class="dropdown-item" (click)="closeMobileMenu()">💼 Office</a>
+          <a routerLink="/products" [queryParams]="{category: 'outdoor'}" class="dropdown-item" (click)="closeMobileMenu()">🌿 Outdoor</a>
+          <a routerLink="/products" [queryParams]="{category: 'kids-room'}" class="dropdown-item" (click)="closeMobileMenu()">🎠 Kids Room</a>
+        </div>
+      </div>
+      <a routerLink="/about" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">About</a>
+      <a routerLink="/contact" routerLinkActive="active" class="nav-link" (click)="closeMobileMenu()">Contact</a>
+    </nav>
+
+    <!-- Right Actions -->
+    <div class="navbar-actions">
+      <!-- Dark Mode -->
+      <button class="action-btn" (click)="toggleDarkMode()" [title]="isDark() ? 'Light Mode' : 'Dark Mode'">
+        <i class="fas" [class.fa-sun]="isDark()" [class.fa-moon]="!isDark()"></i>
+      </button>
+
+      <!-- Search -->
+      <a routerLink="/products" class="action-btn" title="Search">
+        <i class="fas fa-search"></i>
+      </a>
+
+      <!-- Wishlist (auth only) -->
+      @if (authService.isAuthenticated()) {
+        <a routerLink="/wishlist" class="action-btn" title="Wishlist">
+          <i class="fas fa-heart"></i>
+        </a>
+
+        <!-- Cart -->
+        <a routerLink="/cart" class="action-btn cart-btn" title="Cart">
+          <i class="fas fa-shopping-cart"></i>
+          @if (cartService.cartCount() > 0) {
+            <span class="cart-badge">{{ cartService.cartCount() }}</span>
+          }
+        </a>
+
+        <!-- User Menu -->
+        <div class="user-menu" (click)="toggleUserDropdown()">
+          <div class="user-avatar">
+            {{ authService.currentUser()?.first_name?.charAt(0) }}
+          </div>
+          @if (userDropdownOpen()) {
+            <div class="user-dropdown">
+              <div class="dropdown-header">
+                <strong>{{ authService.currentUser()?.first_name }} {{ authService.currentUser()?.last_name }}</strong>
+                <span>{{ authService.currentUser()?.email }}</span>
+              </div>
+              <a routerLink="/profile" class="dropdown-item" (click)="userDropdownOpen.set(false)">
+                <i class="fas fa-user"></i> My Profile
+              </a>
+              <a routerLink="/orders" class="dropdown-item" (click)="userDropdownOpen.set(false)">
+                <i class="fas fa-box"></i> My Orders
+              </a>
+              <a routerLink="/wishlist" class="dropdown-item" (click)="userDropdownOpen.set(false)">
+                <i class="fas fa-heart"></i> Wishlist
+              </a>
+              @if (authService.isAdmin()) {
+                <div class="dropdown-divider"></div>
+                <a routerLink="/admin" class="dropdown-item admin-link" (click)="userDropdownOpen.set(false)">
+                  <i class="fas fa-tachometer-alt"></i> Admin Panel
+                </a>
+              }
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item logout-btn" (click)="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <a routerLink="/auth/login" class="btn btn-primary btn-sm">Login</a>
+        <a routerLink="/auth/register" class="btn btn-secondary btn-sm" style="display:none">Sign Up</a>
+      }
+
+      <!-- Mobile Menu Toggle -->
+      <button class="hamburger" (click)="toggleMobileMenu()" [class.active]="mobileMenuOpen()">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- Mobile Overlay -->
+@if (mobileMenuOpen()) {
+  <div class="overlay" (click)="closeMobileMenu()"></div>
+}
+
+<!-- User dropdown overlay -->
+@if (userDropdownOpen()) {
+  <div class="overlay transparent" (click)="userDropdownOpen.set(false)"></div>
+}

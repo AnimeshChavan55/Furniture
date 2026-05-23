@@ -1,0 +1,153 @@
+<div class="customize-page" style="padding-top:80px; background:var(--bg-secondary); min-height:100vh">
+  @if (loading()) {
+    <div style="display:flex;align-items:center;justify-content:center;height:60vh">
+      <div style="text-align:center"><i class="fas fa-spinner fa-spin fa-3x" style="color:var(--primary)"></i><p style="margin-top:16px">Loading customization options...</p></div>
+    </div>
+  } @else if (product()) {
+    <div class="container" style="padding-top:32px;padding-bottom:64px">
+      <!-- Header -->
+      <div class="customize-header">
+        <div>
+          <div class="breadcrumb">
+            <a routerLink="/">Home</a><span class="separator">/</span>
+            <a routerLink="/products/{{ product()!.slug }}">{{ product()!.name }}</a><span class="separator">/</span>
+            <span class="current">Customize</span>
+          </div>
+          <h1><i class="fas fa-magic" style="color:var(--primary)"></i> Customize Your {{ product()!.name }}</h1>
+          <p>Design your perfect piece — choose every detail and see the price update in real-time</p>
+        </div>
+      </div>
+
+      <div class="customize-layout">
+        <!-- Left: Options -->
+        <div class="options-panel">
+          @for (type of getAvailableTypes(); track type) {
+            <div class="option-group">
+              <h3 class="option-group-title">{{ optionLabels[type] || type }}</h3>
+              <div class="options-grid" [class.color-grid]="type === 'color'">
+                @for (option of product()!.customization_options![type]; track option.id) {
+                  @if (type === 'color' && option.hex_color) {
+                    <button class="color-option" [class.selected]="isSelected(type, option)"
+                      [style.background]="option.hex_color" [title]="option.option_name"
+                      (click)="selectOption(type, option)">
+                      @if (isSelected(type, option)) { <i class="fas fa-check" style="color:white;text-shadow:0 1px 3px rgba(0,0,0,0.5)"></i> }
+                    </button>
+                  } @else {
+                    <button class="option-chip" [class.selected]="isSelected(type, option)"
+                      (click)="selectOption(type, option)">
+                      <span class="chip-name">{{ option.option_name }}</span>
+                      @if (option.price_modifier !== 0) {
+                        <span class="chip-price" [class.plus]="option.price_modifier > 0" [class.minus]="option.price_modifier < 0">
+                          {{ option.price_modifier > 0 ? '+' : '' }}₹{{ option.price_modifier | number }}
+                        </span>
+                      } @else {
+                        <span class="chip-included">Included</span>
+                      }
+                    </button>
+                  }
+                }
+              </div>
+              @if (type === 'color' && selected()[type]) {
+                <p class="selected-label">Selected: <strong>{{ selected()[type]!.option_name }}</strong></p>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Right: Preview & Price -->
+        <div class="preview-panel">
+          <div class="preview-sticky">
+            <!-- Product Preview -->
+            <div class="preview-card">
+              <div class="preview-image">
+                <img [src]="product()!.thumbnail" [alt]="product()!.name">
+                <div class="preview-overlay">
+                  <i class="fas fa-eye"></i>
+                  <span>Live Preview</span>
+                </div>
+              </div>
+              <div class="preview-info">
+                <h4>{{ product()!.name }}</h4>
+                <p>{{ product()!.category_name }}</p>
+              </div>
+            </div>
+
+            <!-- Selected Options Summary -->
+            @if (hasSelections()) {
+              <div class="selections-summary">
+                <h4>Your Selections</h4>
+                @for (type of getAvailableTypes(); track type) {
+                  @if (selected()[type]) {
+                    <div class="selection-row">
+                      <span class="sel-type">{{ type.replace('_', ' ') | titlecase }}</span>
+                      <div style="display:flex;align-items:center;gap:8px">
+                        @if (selected()[type]!.hex_color) {
+                          <span class="mini-color" [style.background]="selected()[type]!.hex_color"></span>
+                        }
+                        <span class="sel-value">{{ selected()[type]!.option_name }}</span>
+                        @if (selected()[type]!.price_modifier !== 0) {
+                          <span class="sel-price" [class.green]="selected()[type]!.price_modifier < 0">
+                            {{ selected()[type]!.price_modifier > 0 ? '+' : '' }}₹{{ selected()[type]!.price_modifier | number }}
+                          </span>
+                        }
+                      </div>
+                    </div>
+                  }
+                }
+              </div>
+            }
+
+            <!-- Live Price -->
+            <div class="live-price-card">
+              <div class="price-breakdown">
+                <div class="price-row-item">
+                  <span>Base Price</span>
+                  <span>₹{{ basePrice() | number }}</span>
+                </div>
+                @for (type of getAvailableTypes(); track type) {
+                  @if (selected()[type] && selected()[type]!.price_modifier !== 0) {
+                    <div class="price-row-item modifier">
+                      <span>{{ selected()[type]!.option_name }}</span>
+                      <span [class.green]="selected()[type]!.price_modifier < 0">
+                        {{ selected()[type]!.price_modifier > 0 ? '+' : '' }}₹{{ selected()[type]!.price_modifier | number }}
+                      </span>
+                    </div>
+                  }
+                }
+                <div class="price-row-item total">
+                  <span>Total Price</span>
+                  <span class="total-price">₹{{ customPrice() | number }}</span>
+                </div>
+              </div>
+
+              <div class="delivery-est">
+                <i class="fas fa-calendar-check"></i>
+                <div>
+                  <strong>Estimated Delivery</strong>
+                  <span>{{ deliveryDate() }}</span>
+                </div>
+              </div>
+
+              <!-- Quantity -->
+              <div class="qty-row">
+                <span>Quantity</span>
+                <div class="qty-ctrl">
+                  <button (click)="changeQty(-1)"><i class="fas fa-minus"></i></button>
+                  <span>{{ quantity() }}</span>
+                  <button (click)="changeQty(1)"><i class="fas fa-plus"></i></button>
+                </div>
+              </div>
+
+              <button class="btn btn-primary btn-full btn-lg" (click)="addToCart()">
+                <i class="fas fa-shopping-cart"></i> Add Custom Order to Cart
+              </button>
+              <a routerLink="/products/{{ product()!.slug }}" class="btn btn-ghost btn-full" style="margin-top:10px">
+                <i class="fas fa-arrow-left"></i> Back to Product
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>
